@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>EventAura</title>
+    <script>
+      // GitHub Pages SPA redirect trick:
+      // Encodes the full path into a query param and redirects to index.html
+      // which then reads it back and restores the correct URL.
+      var l = window.location;
+      l.replace(
+        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+        l.pathname.split('/').slice(0, 2).join('/') +
+        '/?p=' + encodeURIComponent(l.pathname.slice(1) + (l.search ? '&q=' + l.search.slice(1) : '') + l.hash)
+      );
+    </script>
+  </head>
+  <body></body>
+</html>
