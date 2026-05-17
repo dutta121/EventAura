@@ -43,7 +43,7 @@ function AppLayout({ children }) {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/EventAura">
       <AuthProvider>
         <CartProvider>
           <ToastContainer

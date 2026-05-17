@@ -2,9 +2,27 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="/EventAura/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>event-aura</title>
+    <title>EventAura — Plan Extraordinary Events</title>
+    <!-- GitHub Pages SPA redirect receiver -->
+    <script>
+      (function() {
+        var redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect && redirect !== location.href) {
+          history.replaceState(null, null, redirect);
+        }
+        // Also handle ?p= query param from 404.html
+        var p = window.location.search.slice(1);
+        if (p.startsWith('p=')) {
+          var decoded = decodeURIComponent(p.slice(2));
+          window.history.replaceState(null, null,
+            '/' + decoded.replace(/&q=/, '?')
+          );
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
