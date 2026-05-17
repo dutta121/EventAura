@@ -1,0 +1,27 @@
+/* src/pages/admin/AdminBookings.css */
+.status-filter-tabs { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.status-tab {
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--radius-full);
+  font-size: 0.82rem;
+  font-weight: 600;
+  border: 1.5px solid var(--border);
+  color: var(--text-secondary);
+  background: none;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.status-tab:hover { border-color: var(--primary); color: var(--primary-light); }
+.status-tab.active { background: rgba(124,58,237,0.15); border-color: var(--primary); color: var(--primary-light); }
+.status-select {
+  background: var(--bg-card-hover);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.3rem 0.6rem;
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+.status-select:focus { outline: none; border-color: var(--primary); }
+.status-select option { background: var(--bg-card); }

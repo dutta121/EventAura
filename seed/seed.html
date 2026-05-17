@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>EventAura — Firestore Seeder</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f0a1e;
+      color: #f8f6ff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .card {
+      background: #1a1030;
+      border: 1px solid rgba(124,58,237,0.3);
+      border-radius: 16px;
+      padding: 2.5rem;
+      max-width: 640px;
+      width: 100%;
+    }
+    h1 { font-size: 1.6rem; margin-bottom: 0.5rem; color: #a78bfa; }
+    p  { color: #a89bc2; font-size: 0.9rem; margin-bottom: 1.5rem; line-height: 1.6; }
+    button {
+      background: linear-gradient(135deg, #7c3aed, #5b21b6);
+      color: white;
+      border: none;
+      padding: 0.85rem 2rem;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      width: 100%;
+    }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    #log {
+      margin-top: 1.5rem;
+      background: #0f0a1e;
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: monospace;
+      font-size: 0.82rem;
+      max-height: 320px;
+      overflow-y: auto;
+      display: none;
+    }
+    .log-line { padding: 0.2rem 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .log-ok   { color: #34d399; }
+    .log-err  { color: #f87171; }
+    .log-info { color: #60a5fa; }
+    .log-done { color: #fbbf24; font-weight: 700; }
+  </style>
+</head>
+<body>
+<div class="card">
+  <h1>⚡ EventAura Firestore Seeder</h1>
+  <p>
+    Click the button below to upload all <strong>15 vendors</strong> and
+    <strong>4 categories</strong> to your Firestore database.
+    This only needs to be done once.
+  </p>
+  <button id="seedBtn" onclick="runSeed()">🚀 Seed Firestore Now</button>
+  <div id="log"></div>
+</div>
+
+<!-- Firebase SDK (CDN) -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, collection, doc, setDoc, serverTimestamp }
+    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  // ── Your Firebase config ────────────────────────────────────────────────
+  const firebaseConfig = {
+    apiKey: "AIzaSyBLCZ7xY-jA9DRKLYIHlootU0s6j2sR9SE",
+    authDomain: "try-f7fed.firebaseapp.com",
+    projectId: "try-f7fed",
+    storageBucket: "try-f7fed.firebasestorage.app",
+    messagingSenderId: "731025407466",
+    appId: "1:731025407466:web:6209fb38ce460591224693",
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+
+  // ── Seed data ────────────────────────────────────────────────────────────
+  const CATEGORIES = [
+    { id: "birthday",    name: "Birthday Planning",   icon: "🎂", slug: "birthday" },
+    { id: "wedding",     name: "Wedding Decoration",  icon: "💍", slug: "wedding" },
+    { id: "dj",          name: "DJ Booking",          icon: "🎧", slug: "dj" },
+    { id: "photography", name: "Photography",         icon: "📷", slug: "photography" },
+  ];
+
+  const VENDORS = [
+    // ── BIRTHDAY ──────────────────────────────────────────────────────────
+    {
+      id: "b001", name: "Unicorn Dreams", category: "birthday", emoji: "🦄",
+      city: "Kolkata", rating: 4.9, reviewCount: 214, basePrice: 12000, featured: true,
+      description: "Specialising in whimsical unicorn and fantasy-themed birthday parties for kids and adults. We handle decor, cake, and entertainment.",
+      tags: ["Kids","Unicorn Theme","Fantasy","Balloon Art"],
+      heroGradient: "linear-gradient(135deg,#ec4899,#a855f7)",
+      portfolioEmojis: ["🦄","🎂","🎈","✨","🌈","🎁"],
+      packages: [
+        { name:"Dreamy Basic",    price:12000, popular:false, features:["Balloon arch","Unicorn cake table decor","Birthday banner","3-hour setup"] },
+        { name:"Enchanted Party", price:22000, popular:true,  features:["Full room decor","Customised photo booth","Unicorn mascot","Cake table + candy bar","6-hour service"] },
+        { name:"Royal Fantasy",   price:38000, popular:false, features:["Premium decor + fairy lights","Live caricature artist","Personalized invitations","Professional photographer","Full-day service"] },
+      ],
+    },
+    {
+      id: "b002", name: "Galaxy Party Co.", category: "birthday", emoji: "🌌",
+      city: "Mumbai", rating: 4.7, reviewCount: 182, basePrice: 15000, featured: false,
+      description: "Outer space and galaxy themed birthday experiences. Glow-in-the-dark setups, astronaut props, and cosmic cakes.",
+      tags: ["Space Theme","Glow Decor","Teens","Sci-Fi"],
+      heroGradient: "linear-gradient(135deg,#1e3a8a,#7c3aed)",
+      portfolioEmojis: ["🌌","🚀","⭐","🪐","🌙","👽"],
+      packages: [
+        { name:"Stargazer",         price:15000, popular:false, features:["Glow-in-dark balloons","Galaxy banner","Star projector rental","3-hour setup"] },
+        { name:"Cosmic Explorer",   price:28000, popular:true,  features:["Full galaxy decor","LED star ceiling","Astronaut props","Cosmic cake table","6-hour service"] },
+        { name:"Milky Way VIP",     price:50000, popular:false, features:["Complete immersive setup","Custom nebula projections","Space-themed photo booth","Premium entertainment","Full-day event"] },
+      ],
+    },
+    {
+      id: "b003", name: "Candy Land Events", category: "birthday", emoji: "🍭",
+      city: "Delhi", rating: 4.6, reviewCount: 156, basePrice: 10000, featured: false,
+      description: "Sweet and colourful candy-themed parties. Giant lollipops, candy buffets, and rainbow decorations.",
+      tags: ["Candy Theme","Colorful","Kids","Sweet Buffet"],
+      heroGradient: "linear-gradient(135deg,#f43f5e,#f97316)",
+      portfolioEmojis: ["🍭","🍬","🌈","🎂","🍩","🎉"],
+      packages: [
+        { name:"Sweet Starter",  price:10000, popular:false, features:["Candy balloon garland","Sweet buffet table","Birthday banner","3-hour setup"] },
+        { name:"Candy Kingdom",  price:20000, popular:true,  features:["Full candy theme decor","Giant lolly props","Rainbow ceiling","Candy buffet","5-hour service"] },
+        { name:"Sugar Rush VIP", price:35000, popular:false, features:["Complete candy world setup","Custom candy bar","Dessert wall","Photo booth","All-day service"] },
+      ],
+    },
+    {
+      id: "b004", name: "Royal Bash", category: "birthday", emoji: "👑",
+      city: "Bangalore", rating: 4.8, reviewCount: 203, basePrice: 18000, featured: true,
+      description: "Luxury adult birthday parties with elegant gold and black themes, premium table settings, and gourmet experiences.",
+      tags: ["Luxury","Adults","Gold Theme","Premium"],
+      heroGradient: "linear-gradient(135deg,#78350f,#d97706)",
+      portfolioEmojis: ["👑","🥂","✨","🌹","💎","🎭"],
+      packages: [
+        { name:"Gold Elegance",  price:18000, popular:false, features:["Gold & black decor","Premium centrepieces","Mood lighting","4-hour setup"] },
+        { name:"Royal Court",    price:35000, popular:true,  features:["Luxury full-room setup","Personalized photo wall","Live musician","Premium bar setup","6-hour service"] },
+        { name:"Imperial Gala",  price:65000, popular:false, features:["5-star level decor","Personal event manager","Gourmet catering coord.","Live band","Full-day VIP service"] },
+      ],
+    },
+    // ── WEDDING ───────────────────────────────────────────────────────────
+    {
+      id: "w001", name: "Eternal Blooms", category: "wedding", emoji: "🌸",
+      city: "Kolkata", rating: 4.9, reviewCount: 328, basePrice: 50000, featured: true,
+      description: "India's most romantic wedding decorators. We specialize in floral mandaps, wall installations, and fairy-light canopies.",
+      tags: ["Floral","Romantic","Mandap","Luxury"],
+      heroGradient: "linear-gradient(135deg,#be185d,#f43f5e)",
+      portfolioEmojis: ["🌸","💐","🕯️","✨","🌹","💍"],
+      packages: [
+        { name:"Blooming Love",   price:50000,  popular:false, features:["Floral mandap","Stage backdrop","Aisle decor","Centrepieces (10 tables)"] },
+        { name:"Garden of Eden",  price:95000,  popular:true,  features:["Luxury floral mandap","Flower wall backdrop","Fairy-light canopy","Full venue decor","Personal coordinator"] },
+        { name:"Royal Florals",   price:180000, popular:false, features:["Exclusive designer mandap","Luxury imported flowers","360° venue transformation","Live streaming setup","2-day service"] },
+      ],
+    },
+    {
+      id: "w002", name: "Luxe Weddings", category: "wedding", emoji: "💎",
+      city: "Mumbai", rating: 4.8, reviewCount: 289, basePrice: 80000, featured: false,
+      description: "Ultra-premium wedding decoration specialists. Crystal chandeliers, gold draping, and cinematic stage setups.",
+      tags: ["Crystal","Gold Draping","Luxury","Premium Stage"],
+      heroGradient: "linear-gradient(135deg,#1e293b,#7c3aed)",
+      portfolioEmojis: ["💎","🕯️","✨","🥂","👸","🌟"],
+      packages: [
+        { name:"Crystal Affair",  price:80000,  popular:false, features:["Crystal centrepieces","Draped ceiling","LED stage","20-table decor"] },
+        { name:"Diamond Soiree",  price:150000, popular:true,  features:["Full crystal theme","Gold drapery","Luxury stage","Entry arch","Personal manager"] },
+        { name:"Platinum Elite",  price:300000, popular:false, features:["Star-level luxury","Imported crystal","Custom stage","360° photo booth","Full production team"] },
+      ],
+    },
+    {
+      id: "w003", name: "Desi Weddings", category: "wedding", emoji: "🪔",
+      city: "Delhi", rating: 4.7, reviewCount: 245, basePrice: 40000, featured: false,
+      description: "Traditional Indian wedding decorations with a modern touch. Marigolds, diyas, and vibrant colour themes.",
+      tags: ["Traditional","Marigold","Desi Vibes","Bollywood"],
+      heroGradient: "linear-gradient(135deg,#92400e,#f59e0b)",
+      portfolioEmojis: ["🪔","🌼","🌸","🎊","🪢","🎶"],
+      packages: [
+        { name:"Ghar Ki Shaadi",  price:40000,  popular:false, features:["Marigold mandap","Diya centrepieces","Colourful draping","Entry gate decor"] },
+        { name:"Rang De Dulha",   price:75000,  popular:true,  features:["Full traditional decor","Floral canopy","Antique props","Mehndi setup","Full venue"] },
+        { name:"Maharaja Wedding",price:140000, popular:false, features:["Grand royal theme","Elephant props","Fireworks coord.","Full 3-day setup"] },
+      ],
+    },
+    {
+      id: "w004", name: "Grand Floral Co.", category: "wedding", emoji: "🌺",
+      city: "Bangalore", rating: 4.6, reviewCount: 198, basePrice: 60000, featured: false,
+      description: "Destination wedding specialists with experience in beach, garden, and palace venues across India.",
+      tags: ["Destination","Garden","Beach","Palace"],
+      heroGradient: "linear-gradient(135deg,#065f46,#10b981)",
+      portfolioEmojis: ["🌺","🏖️","🏛️","🌿","🌊","✨"],
+      packages: [
+        { name:"Garden Bliss",   price:60000,  popular:false, features:["Outdoor garden setup","Floral arch","Natural decor","Stage backdrop"] },
+        { name:"Beach Paradise", price:120000, popular:true,  features:["Beach venue transformation","Boho decor","Sunset backdrop","Fire pit setup"] },
+        { name:"Palace Grand",   price:250000, popular:false, features:["Palace-style full setup","Heritage props","Luxury lighting","Royal carpet"] },
+      ],
+    },
+    // ── DJ ────────────────────────────────────────────────────────────────
+    {
+      id: "d001", name: "DJ Nexus", category: "dj", emoji: "🎧",
+      city: "Kolkata", rating: 4.9, reviewCount: 412, basePrice: 8000, featured: true,
+      description: "Kolkata's top DJ with 10+ years of experience. Specializes in Bollywood, EDM, and fusion mixes for all events.",
+      tags: ["Bollywood","EDM","Weddings","Corporate"],
+      heroGradient: "linear-gradient(135deg,#1e3a8a,#3b82f6)",
+      portfolioEmojis: ["🎧","🎵","🎶","🔊","💃","🕺"],
+      packages: [
+        { name:"Basic Beats",        price:8000,  popular:false, features:["4-hour set","Basic sound system","Bollywood + pop mix","1 DJ"] },
+        { name:"Party Pro",          price:18000, popular:true,  features:["8-hour set","Premium sound system","LED lighting rig","Custom playlist","2 DJs"] },
+        { name:"Festival Experience",price:40000, popular:false, features:["Full-night set","Concert-grade sound","Laser show","Custom branding","DJ + VJ"] },
+      ],
+    },
+    {
+      id: "d002", name: "BassLine Pro", category: "dj", emoji: "🎵",
+      city: "Mumbai", rating: 4.7, reviewCount: 298, basePrice: 12000, featured: false,
+      description: "Specializing in deep house, techno, and lounge music for corporate events and upscale parties.",
+      tags: ["Deep House","Techno","Lounge","Corporate"],
+      heroGradient: "linear-gradient(135deg,#0f172a,#6366f1)",
+      portfolioEmojis: ["🎵","🎹","🔊","🌃","🎼","💿"],
+      packages: [
+        { name:"Lounge Set",    price:12000, popular:false, features:["4-hour ambient set","Quality sound system","Background/lounge music"] },
+        { name:"Club Night",    price:25000, popular:true,  features:["8-hour club set","Premium bassline rig","LED dancefloor sync","Custom rider"] },
+        { name:"Ultra Premium", price:55000, popular:false, features:["Full-event production","Celebrity DJ setup","Full AV production","Live mixing"] },
+      ],
+    },
+    {
+      id: "d003", name: "ElectroVibes", category: "dj", emoji: "⚡",
+      city: "Bangalore", rating: 4.6, reviewCount: 187, basePrice: 10000, featured: false,
+      description: "High-energy DJ specialising in Bhangra, Punjabi Pop, and Garba nights.",
+      tags: ["Bhangra","Punjabi Pop","Garba","Dandiya"],
+      heroGradient: "linear-gradient(135deg,#7c2d12,#ef4444)",
+      portfolioEmojis: ["⚡","🕺","🥁","🎊","💃","🎉"],
+      packages: [
+        { name:"Garba Night",   price:10000, popular:false, features:["4-hour set","Garba/Dandiya playlist","Sound system","Coloured lights"] },
+        { name:"Bhangra Blast", price:22000, popular:true,  features:["8-hour celebration","Premium Punjabi mix","Dhol player","Full lighting rig"] },
+        { name:"Festival Elite",price:45000, popular:false, features:["Full-night event","Multi-genre set","Professional dhol team","Laser + fog effects"] },
+      ],
+    },
+    // ── PHOTOGRAPHY ───────────────────────────────────────────────────────
+    {
+      id: "p001", name: "LensArt Studio", category: "photography", emoji: "📷",
+      city: "Kolkata", rating: 4.9, reviewCount: 356, basePrice: 20000, featured: true,
+      description: "Award-winning photography studio. Masters of candid, pre-wedding shoots, and cinematic wedding films.",
+      tags: ["Candid","Pre-Wedding","Cinematic","Award Winning"],
+      heroGradient: "linear-gradient(135deg,#064e3b,#10b981)",
+      portfolioEmojis: ["📷","🎬","🌅","💑","🎞️","✨"],
+      packages: [
+        { name:"Story Teller",  price:20000, popular:false, features:["1 photographer","8-hour coverage","300 edited photos","Online gallery"] },
+        { name:"Cinematic Duo", price:45000, popular:true,  features:["2 photographers","1 videographer","600 edited photos","Cinematic highlight reel (5 min)","Same-day preview"] },
+        { name:"Film Studio",   price:90000, popular:false, features:["Full team (3 photographers + 2 videographers)","Drone coverage","1000+ photos","30-min documentary film","Photo album"] },
+      ],
+    },
+    {
+      id: "p002", name: "Golden Hour Clicks", category: "photography", emoji: "🌅",
+      city: "Delhi", rating: 4.7, reviewCount: 278, basePrice: 15000, featured: false,
+      description: "Specializing in golden hour outdoor shoots, destination weddings, and lifestyle photography.",
+      tags: ["Outdoor","Golden Hour","Destination","Lifestyle"],
+      heroGradient: "linear-gradient(135deg,#78350f,#f59e0b)",
+      portfolioEmojis: ["🌅","🌇","🏔️","📸","🌊","🌿"],
+      packages: [
+        { name:"Sunset Moments",     price:15000, popular:false, features:["1 photographer","6-hour coverage","200 edited photos","Digital delivery"] },
+        { name:"Golden Experience",  price:30000, popular:true,  features:["2 photographers","Full-day coverage","400 edited photos","Short film (3 min)","Drone shots"] },
+        { name:"Destination Package",price:80000, popular:false, features:["2-day coverage","Travel included","Pre-wedding + wedding","50-page album","Feature film"] },
+      ],
+    },
+    {
+      id: "p003", name: "CineMoment", category: "photography", emoji: "🎬",
+      city: "Mumbai", rating: 4.8, reviewCount: 312, basePrice: 25000, featured: false,
+      description: "Bollywood-inspired cinematic wedding films. We create movie-quality wedding videos that tell your love story.",
+      tags: ["Cinematic","Bollywood Style","Wedding Film","Aerial"],
+      heroGradient: "linear-gradient(135deg,#1e1b4b,#7c3aed)",
+      portfolioEmojis: ["🎬","🎥","🌟","💒","🎞️","🏆"],
+      packages: [
+        { name:"Director's Cut", price:25000,  popular:false, features:["1 videographer","Full-day shoot","Cinematic 10-min film","Highlights reel"] },
+        { name:"Blockbuster",    price:55000,  popular:true,  features:["2 videographers","Drone footage","30-min feature film","5-min highlights","Instagram reels"] },
+        { name:"Epic Film",      price:110000, popular:false, features:["Full production team","Multi-day coverage","Theatrical feature film","4K quality","World-class editing"] },
+      ],
+    },
+    {
+      id: "p004", name: "Portrait Palace", category: "photography", emoji: "🖼️",
+      city: "Bangalore", rating: 4.6, reviewCount: 223, basePrice: 18000, featured: false,
+      description: "Traditional and fine-art portrait photography. Family portraits, corporate headshots, and maternity shoots.",
+      tags: ["Portrait","Traditional","Family","Corporate"],
+      heroGradient: "linear-gradient(135deg,#1e293b,#475569)",
+      portfolioEmojis: ["🖼️","👨‍👩‍👧","📸","🌷","💼","🎨"],
+      packages: [
+        { name:"Classic Portrait",price:18000, popular:false, features:["1 photographer","4-hour session","150 edited photos","Studio or outdoor"] },
+        { name:"Family Heritage", price:35000, popular:true,  features:["2-hour studio session","300 edited photos","Fine-art prints (10)","Family album"] },
+        { name:"Fine Art Series", price:70000, popular:false, features:["Premium fine-art studio","Full-day session","500 edited photos","Canvas prints","Exhibition quality"] },
+      ],
+    },
+  ];
+
+  // ── Global seeder function ───────────────────────────────────────────────
+  window.runSeed = async function () {
+    const btn = document.getElementById("seedBtn");
+    const logDiv = document.getElementById("log");
+    btn.disabled = true;
+    logDiv.style.display = "block";
+    logDiv.innerHTML = "";
+
+    const log = (msg, cls = "log-info") => {
+      const div = document.createElement("div");
+      div.className = `log-line ${cls}`;
+      div.textContent = msg;
+      logDiv.appendChild(div);
+      logDiv.scrollTop = logDiv.scrollHeight;
+    };
+
+    try {
+      log("▶ Starting seed...", "log-info");
+
+      // Seed categories
+      log("📂 Uploading categories...", "log-info");
+      for (const cat of CATEGORIES) {
+        await setDoc(doc(db, "categories", cat.id), cat);
+        log(`  ✓ Category: ${cat.name}`, "log-ok");
+      }
+
+      // Seed vendors
+      log("🏪 Uploading vendors...", "log-info");
+      for (const vendor of VENDORS) {
+        const { id, ...data } = vendor;
+        await setDoc(doc(db, "vendors", id), { ...data, createdAt: serverTimestamp() });
+        log(`  ✓ Vendor: ${vendor.emoji} ${vendor.name} (${vendor.category})`, "log-ok");
+      }
+
+      log("", "");
+      log(`🎉 Done! Uploaded ${CATEGORIES.length} categories + ${VENDORS.length} vendors.`, "log-done");
+      log("You can now close this tab and open your EventAura app.", "log-info");
+      btn.textContent = "✅ Seeding Complete!";
+    } catch (err) {
+      log(`❌ Error: ${err.message}`, "log-err");
+      btn.disabled = false;
+      btn.textContent = "🚀 Retry Seed";
+    }
+  };
+</script>
+</body>
+</html>

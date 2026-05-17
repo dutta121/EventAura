@@ -1,0 +1,118 @@
+/* src/pages/services/ServiceCatalog.css */
+.service-catalog { min-height: 100vh; }
+
+/* Hero */
+.catalog-hero {
+  position: relative;
+  padding: 5rem 0 4rem;
+  overflow: hidden;
+}
+.catalog-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.25), rgba(15, 10, 30, 0.8));
+}
+.catalog-hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  color: white;
+}
+.catalog-hero-emoji { font-size: 4rem; filter: drop-shadow(0 4px 16px rgba(0,0,0,0.4)); }
+.catalog-hero-content h1 { font-size: 3rem; }
+.catalog-hero-content p { font-size: 1.05rem; opacity: 0.85; max-width: 520px; }
+
+.catalog-body { padding: 2.5rem 0 4rem; }
+
+/* Filters */
+.catalog-filters {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-lg);
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+.search-wrapper {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+}
+.search-icon {
+  position: absolute;
+  left: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+}
+.search-input {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.6rem 0.85rem 0.6rem 2.4rem;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-family: inherit;
+  transition: border-color var(--transition);
+}
+.search-input:focus { outline: none; border-color: var(--primary); }
+.search-input::placeholder { color: var(--text-muted); }
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+}
+.filter-select {
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.6rem 0.85rem;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+.filter-select:focus { outline: none; border-color: var(--primary); }
+.filter-select option { background: var(--bg-card); }
+
+.price-filter {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+.price-slider {
+  width: 120px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.catalog-count {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  margin-left: auto;
+}
+
+/* Grid */
+.vendors-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .catalog-hero-content h1 { font-size: 2rem; }
+  .catalog-filters { flex-direction: column; align-items: stretch; }
+  .catalog-count { margin-left: 0; }
+}

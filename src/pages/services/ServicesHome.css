@@ -1,0 +1,42 @@
+/* src/pages/services/ServicesHome.css */
+.services-home { min-height: 100vh; padding-bottom: 4rem; }
+.services-home-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+.service-home-card {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 2rem;
+  text-decoration: none;
+  color: inherit;
+}
+.service-home-icon-wrap {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  flex-shrink: 0;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+}
+.service-home-info { display: flex; flex-direction: column; gap: 0.5rem; }
+.service-home-info h2 { font-size: 1.3rem; }
+.service-home-info p { color: var(--text-secondary); font-size: 0.9rem; }
+.service-home-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--primary-light);
+  font-size: 0.88rem;
+  font-weight: 600;
+  margin-top: 0.25rem;
+  transition: gap var(--transition);
+}
+.service-home-card:hover .service-home-link { gap: 0.7rem; }
+@media (max-width: 768px) { .services-home-grid { grid-template-columns: 1fr; } }

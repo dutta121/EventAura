@@ -1,0 +1,74 @@
+/* src/pages/BookingConfirmation.css */
+.confirmation-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+.confirmation-card {
+  width: 100%;
+  max-width: 560px;
+  padding: 3rem 2.5rem;
+  border-radius: var(--radius-xl);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+.confirmation-icon { color: var(--success); animation: scaleIn 0.5s ease; }
+.confirmation-card h1 { font-size: 2rem; }
+.confirmation-sub { color: var(--text-secondary); max-width: 380px; }
+.confirmation-id {
+  background: rgba(52, 211, 153, 0.08);
+  border: 1px solid rgba(52, 211, 153, 0.25);
+  color: var(--success);
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--radius-full);
+  font-size: 0.9rem;
+}
+.confirmation-details {
+  width: 100%;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.confirmation-detail-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+.confirmation-detail-row strong { margin-left: auto; color: var(--text-primary); }
+.confirmation-total { color: var(--accent) !important; font-size: 1.1rem !important; }
+.confirmation-items {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.confirmation-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(255,255,255,0.03);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+}
+.confirmation-note {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  color: var(--accent);
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  width: 100%;
+}
+.confirmation-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center; }
