@@ -2,8 +2,7 @@
 import { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '../firebase/config';
-import { getUserDocument, handleGoogleRedirectResult } from '../firebase/auth';
-import { toast } from 'react-toastify';
+import { getUserDocument } from '../firebase/auth';
 
 const AuthContext = createContext(null);
 
@@ -14,26 +13,6 @@ export const AuthProvider = ({ children }) => {
   const [userDoc, setUserDoc] = useState(null);
   const [loading, setLoading] = useState(true);
   const refreshTimerRef = useRef(null);
-
-  // ── Process Google redirect result once on app load ──────────────────────
-  useEffect(() => {
-    handleGoogleRedirectResult()
-      .then((result) => {
-        if (result?.user) {
-          // onAuthStateChanged below will pick up the user automatically
-          toast.success('Welcome! 🎉');
-        }
-      })
-      .catch((err) => {
-        if (err.code === 'auth/account-exists-with-different-credential') {
-          toast.error(err.message, { autoClose: 6000 });
-        } else if (err.code !== 'auth/cancelled-popup-request') {
-          toast.error('Google sign-in failed. Please try again.');
-          console.error('[Google redirect]', err);
-        }
-      });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // ── Token refresh to detect disabled accounts ────────────────────────────
   const startTokenRefresh = (user) => {

@@ -3,8 +3,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
-  signInWithRedirect,
-  getRedirectResult,
+  signInWithPopup,
   updateProfile,
 } from 'firebase/auth';
 import {
@@ -26,18 +25,10 @@ export const signInWithEmail = async (email, password) => {
   return signInWithEmailAndPassword(auth, email, password);
 };
 
-// ─── Google OAuth (Redirect flow — works on GitHub Pages / hosted envs) ──────
+// ─── Google OAuth (Popup — works on GitHub Pages via postMessage) ─────────────
 
-// Step 1: Kick off the redirect. Page navigates away to Google.
-export const signInWithGoogle = () => {
-  return signInWithRedirect(auth, googleProvider);
-};
-
-// Step 2: Called ONCE on app load (in AuthContext) to collect the redirect result.
-export const handleGoogleRedirectResult = async () => {
-  const result = await getRedirectResult(auth);
-  if (!result) return null; // No pending redirect — normal load
-
+export const signInWithGoogle = async () => {
+  const result = await signInWithPopup(auth, googleProvider);
   const user = result.user;
 
   // Block duplicate accounts: same email registered under a different UID

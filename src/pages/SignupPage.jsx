@@ -34,13 +34,22 @@ export default function SignupPage() {
     }
   };
 
-  const handleGoogleSignIn = () => {
-    // signInWithRedirect navigates away — result handled in AuthContext on return
+  const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
-    signInWithGoogle().catch(() => {
+    try {
+      await signInWithGoogle();
+      toast.success('Welcome to EventAura! 🎉');
+      navigate('/dashboard');
+    } catch (err) {
+      const msg = err.code === 'auth/account-exists-with-different-credential'
+        ? err.message
+        : err.code === 'auth/popup-closed-by-user'
+        ? 'Sign-in cancelled.'
+        : 'Google sign-in failed. Please try again.';
+      toast.error(msg);
+    } finally {
       setGoogleLoading(false);
-      toast.error('Google sign-in failed.');
-    });
+    }
   };
 
   return (
