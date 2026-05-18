@@ -2,7 +2,8 @@
 import { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '../firebase/config';
-import { getUserDocument } from '../firebase/auth';
+import { getUserDocument, handleGoogleRedirectResult } from '../firebase/auth';
+import { toast } from 'react-toastify';
 
 const AuthContext = createContext(null);
 
@@ -14,15 +15,38 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const refreshTimerRef = useRef(null);
 
-  // Start a periodic token-force-refresh. If Firebase rejects (account disabled),
-  // sign the user out immediately rather than waiting for token expiry.
+  // ── Process Google redirect result once on app load ──────────────────────
+  useEffect(() => {
+    handleGoogleRedirectResult()
+      .then((result) => {
+        if (result?.user) {
+          // onAuthStateChanged below will pick up the user automatically
+          toast.success('Welcome! 🎉');
+        }
+      })
+      .catch((err) => {
+        if (err.code === 'auth/account-exists-with-different-credential') {
+          toast.error(err.message, { autoClose: 6000 });
+        } else if (err.code !== 'auth/cancelled-popup-request') {
+          toast.error('Google sign-in failed. Please try again.');
+          console.error('[Google redirect]', err);
+        }
+      });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ── Token refresh to detect disabled accounts ────────────────────────────
   const startTokenRefresh = (user) => {
     stopTokenRefresh();
     refreshTimerRef.current = setInterval(async () => {
       try {
-        await user.getIdToken(/* forceRefresh */ true);
+        await user.getIdToken(true);
       } catch (err) {
-        const disabledCodes = ['auth/user-disabled', 'auth/user-token-expired', 'auth/invalid-user-token'];
+        const disabledCodes = [
+          'auth/user-disabled',
+          'auth/user-token-expired',
+          'auth/invalid-user-token',
+        ];
         if (disabledCodes.includes(err.code)) {
           console.warn('[AuthContext] Account disabled — signing out.');
           await signOut(auth);
@@ -38,6 +62,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // ── Auth state listener ──────────────────────────────────────────────────
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);

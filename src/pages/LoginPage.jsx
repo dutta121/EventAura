@@ -1,9 +1,10 @@
 // src/pages/LoginPage.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { Mail, Lock, Zap, Eye, EyeOff } from 'lucide-react';
 import { signInWithEmail, signInWithGoogle } from '../firebase/auth';
+import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import './AuthPage.css';
 
@@ -13,6 +14,12 @@ export default function LoginPage() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { register, handleSubmit, formState: { errors } } = useForm();
+  const { currentUser } = useAuth();
+
+  // If already signed in (e.g. after Google redirect), go to dashboard
+  useEffect(() => {
+    if (currentUser) navigate('/dashboard', { replace: true });
+  }, [currentUser, navigate]);
 
   const onSubmit = async (data) => {
     setLoading(true);
@@ -27,20 +34,13 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleSignIn = async () => {
+  const handleGoogleSignIn = () => {
+    // signInWithRedirect navigates away — result handled in AuthContext on return
     setGoogleLoading(true);
-    try {
-      await signInWithGoogle();
-      toast.success('Welcome! 🎉');
-      navigate('/dashboard');
-    } catch (err) {
-      const msg = err.code === 'auth/account-exists-with-different-credential'
-        ? err.message
-        : 'Google sign-in failed. Please try again.';
-      toast.error(msg);
-    } finally {
+    signInWithGoogle().catch(() => {
       setGoogleLoading(false);
-    }
+      toast.error('Google sign-in failed. Please try again.');
+    });
   };
 
   return (
