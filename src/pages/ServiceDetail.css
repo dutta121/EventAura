@@ -19,6 +19,17 @@
   margin-bottom: 1.25rem;
 }
 .detail-hero-emoji { font-size: 5rem; filter: drop-shadow(0 4px 16px rgba(0,0,0,0.5)); }
+
+/* Real photo hero */
+.detail-hero-img { overflow: hidden; position: relative; }
+.detail-hero-real-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+}
 .detail-header-body { display: flex; flex-direction: column; gap: 0.6rem; }
 .detail-badge {
   display: inline-block;
@@ -106,6 +117,21 @@
   transition: transform var(--transition);
 }
 .gallery-item:hover { transform: scale(1.04); }
+
+/* Real-image gallery thumbnails */
+.gallery-item-photo {
+  padding: 0;
+  overflow: hidden;
+}
+.gallery-item-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  display: block;
+  transition: transform 0.35s ease;
+}
+.gallery-item-photo:hover img { transform: scale(1.07); }
 
 /* Booking sidebar */
 .detail-sidebar { position: sticky; top: 84px; }

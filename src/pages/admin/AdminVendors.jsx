@@ -1,7 +1,7 @@
 // src/pages/admin/AdminVendors.jsx
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { Plus, Edit, Trash2, X, Save } from 'lucide-react';
+import { Plus, Edit, Trash2, X, Save, Image } from 'lucide-react';
 import { getVendors, addVendor, updateVendor, deleteVendor } from '../../firebase/firestore';
 import { CATEGORIES } from '../../utils/constants';
 import { formatCurrency } from '../../utils/formatCurrency';
@@ -32,6 +32,7 @@ export default function AdminVendors() {
       if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') setValue(k, v);
     });
     setValue('tags', vendor.tags?.join(', ') || '');
+    setValue('galleryUrls', vendor.galleryUrls?.join(', ') || '');
     setShowModal(true);
   };
   const closeModal = () => { setShowModal(false); setEditingVendor(null); reset(); };
@@ -48,6 +49,10 @@ export default function AdminVendors() {
       description: data.description || '',
       tags: data.tags ? data.tags.split(',').map((t) => t.trim()).filter(Boolean) : [],
       emoji: data.emoji || '🎉',
+      imageUrl: data.imageUrl?.trim() || '',
+      galleryUrls: data.galleryUrls
+        ? data.galleryUrls.split(',').map((u) => u.trim()).filter(Boolean)
+        : [],
       featured: data.featured === 'true' || data.featured === true,
       packages: [
         { name: data.pkg1Name, price: parseInt(data.pkg1Price) || 0, features: (data.pkg1Features || '').split(',').map((f) => f.trim()).filter(Boolean) },
@@ -101,7 +106,15 @@ export default function AdminVendors() {
               <tbody>
                 {vendors.map((v) => (
                   <tr key={v.id}>
-                    <td><strong>{v.emoji} {v.name}</strong></td>
+                    <td>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      {v.imageUrl
+                        ? <img src={v.imageUrl} alt={v.name} style={{ width: 36, height: 36, borderRadius: 6, objectFit: 'cover', flexShrink: 0 }} />
+                        : <span style={{ fontSize: '1.4rem' }}>{v.emoji}</span>
+                      }
+                      <strong>{v.name}</strong>
+                    </div>
+                  </td>
                     <td><span className={`badge badge-user`}>{v.category}</span></td>
                     <td>{v.city}</td>
                     <td>⭐ {v.rating?.toFixed(1)}</td>
@@ -148,9 +161,38 @@ export default function AdminVendors() {
                   <input className="form-input" {...register('city')} placeholder="Kolkata" />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Emoji</label>
+                  <label className="form-label">Emoji (fallback)</label>
                   <input className="form-input" {...register('emoji')} placeholder="🎉" />
                 </div>
+              </div>
+              {/* Image URLs */}
+              <div className="form-group">
+                <label className="form-label">
+                  <Image size={14} style={{ marginRight: 5, verticalAlign: 'middle' }} />
+                  Main Image URL
+                </label>
+                <input
+                  className="form-input"
+                  {...register('imageUrl')}
+                  placeholder="https://example.com/photo.jpg"
+                />
+                <small style={{ color: 'var(--text-muted)', fontSize: '0.76rem' }}>
+                  Replaces the emoji with a real photo on the vendor card.
+                </small>
+              </div>
+              <div className="form-group">
+                <label className="form-label">
+                  <Image size={14} style={{ marginRight: 5, verticalAlign: 'middle' }} />
+                  Gallery URLs (comma-separated)
+                </label>
+                <input
+                  className="form-input"
+                  {...register('galleryUrls')}
+                  placeholder="https://img1.jpg, https://img2.jpg, https://img3.jpg"
+                />
+                <small style={{ color: 'var(--text-muted)', fontSize: '0.76rem' }}>
+                  Extra images shown in a hover slideshow on the vendor card.
+                </small>
               </div>
               <div className="form-row">
                 <div className="form-group">

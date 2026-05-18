@@ -2,10 +2,11 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { Mail, Lock, Zap, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { signInWithEmail, signInWithGoogle } from '../firebase/auth';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
+import AnimatedLogo from '../components/common/AnimatedLogo';
 import './AuthPage.css';
 
 export default function LoginPage() {
@@ -57,8 +58,7 @@ export default function LoginPage() {
       <div className="auth-card glass animate-scaleIn">
         {/* Logo */}
         <div className="auth-logo">
-          <div className="auth-logo-icon"><Zap size={24} fill="currentColor" /></div>
-          <span>EventAura</span>
+          <AnimatedLogo size="lg" as="div" />
         </div>
 
         <h1 className="auth-title">Welcome back</h1>

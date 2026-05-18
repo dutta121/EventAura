@@ -53,9 +53,15 @@ export default function ServiceDetail() {
           <div className="detail-main">
             {/* Header */}
             <div className="detail-header card">
-              <div className="detail-hero-img" style={{ background: vendor.heroGradient || 'linear-gradient(135deg,var(--primary),var(--primary-dark))' }}>
+            <div className="detail-hero-img" style={{
+                background: vendor.heroGradient || 'linear-gradient(135deg,var(--primary),var(--primary-dark))',
+              }}>
+              {vendor.imageUrl ? (
+                <img src={vendor.imageUrl} alt={vendor.name} className="detail-hero-real-img" />
+              ) : (
                 <span className="detail-hero-emoji">{vendor.emoji || '🎉'}</span>
-              </div>
+              )}
+            </div>
               <div className="detail-header-body">
                 <div className="detail-badge">{vendor.category}</div>
                 <h1>{vendor.name}</h1>
@@ -100,15 +106,22 @@ export default function ServiceDetail() {
             </div>
 
             {/* Gallery */}
-            {vendor.portfolioEmojis && (
+            {(vendor.galleryUrls?.length > 0 || vendor.portfolioEmojis) && (
               <div className="detail-gallery card">
                 <h2>Portfolio</h2>
                 <div className="gallery-grid">
-                  {vendor.portfolioEmojis.map((em, i) => (
-                    <div key={i} className="gallery-item" style={{ background: vendor.heroGradient || 'var(--bg-card-hover)' }}>
-                      <span>{em}</span>
-                    </div>
-                  ))}
+                  {vendor.galleryUrls?.length > 0
+                    ? vendor.galleryUrls.map((url, i) => (
+                        <div key={i} className="gallery-item gallery-item-photo">
+                          <img src={url} alt={`Portfolio ${i + 1}`} />
+                        </div>
+                      ))
+                    : vendor.portfolioEmojis?.map((em, i) => (
+                        <div key={i} className="gallery-item" style={{ background: vendor.heroGradient || 'var(--bg-card-hover)' }}>
+                          <span>{em}</span>
+                        </div>
+                      ))
+                  }
                 </div>
               </div>
             )}

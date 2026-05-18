@@ -50,30 +50,82 @@ export default function Checkout() {
       return;
     }
     setLocating(true);
+
     navigator.geolocation.getCurrentPosition(
       async ({ coords }) => {
+        const { latitude, longitude } = coords;
         try {
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${coords.latitude}&lon=${coords.longitude}&format=json`,
-            { headers: { 'Accept-Language': 'en' } }
+          // ── Primary: BigDataCloud (free, no key, CORS-friendly, fast) ──
+          const bdcRes = await fetch(
+            `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
           );
-          const data = await res.json();
-          const address = data.display_name || `${coords.latitude}, ${coords.longitude}`;
-          setValue('address', address, { shouldValidate: true });
-          toast.success('📍 Location fetched!');
-        } catch {
-          toast.error('Could not reverse-geocode location.');
+          if (bdcRes.ok) {
+            const bdc = await bdcRes.json();
+            const parts = [
+              bdc.locality,
+              bdc.city || bdc.principalSubdivisionCode,
+              bdc.principalSubdivision,
+              bdc.countryName,
+            ].filter(Boolean);
+            if (parts.length) {
+              setValue('address', parts.join(', '), { shouldValidate: true });
+              toast.success('📍 Location fetched!');
+              setLocating(false);
+              return;
+            }
+          }
+
+          // ── Fallback: Nominatim with required User-Agent ──
+          const nomRes = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`,
+            {
+              headers: {
+                'Accept-Language': 'en',
+                'User-Agent': 'EventAura/1.0 (event planning app)',
+              },
+            }
+          );
+          if (nomRes.ok) {
+            const nom = await nomRes.json();
+            const a = nom.address || {};
+            const parts = [
+              a.house_number,
+              a.road,
+              a.neighbourhood || a.suburb,
+              a.city || a.town || a.village,
+              a.state_district,
+              a.state,
+              a.postcode,
+              a.country,
+            ].filter(Boolean);
+            const address = parts.length ? parts.join(', ') : nom.display_name;
+            setValue('address', address, { shouldValidate: true });
+            toast.success('📍 Location fetched!');
+          } else {
+            throw new Error('Geocoding API error');
+          }
+        } catch (err) {
+          console.error('[Location]', err);
+          // Last resort: use raw coordinates
+          setValue('address', `Lat: ${latitude.toFixed(5)}, Lon: ${longitude.toFixed(5)}`, { shouldValidate: true });
+          toast.warn('📍 Exact address unavailable — coordinates filled in. Please update manually.');
         } finally {
           setLocating(false);
         }
       },
       (err) => {
         setLocating(false);
-        toast.error(err.code === 1 ? 'Location permission denied.' : 'Could not get location.');
+        const messages = {
+          1: 'Location permission denied. Please allow location access in your browser settings.',
+          2: 'Location unavailable. Check your device GPS or network.',
+          3: 'Location request timed out. Try again.',
+        };
+        toast.error(messages[err.code] || 'Could not get your location.');
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 }
     );
   };
+
 
   return (
     <div className="checkout-page">

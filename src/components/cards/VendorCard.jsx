@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Star, MapPin, ShoppingCart, Check } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { formatCurrency } from '../../utils/formatCurrency';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import './VendorCard.css';
 
 export default function VendorCard({ vendor }) {
@@ -12,6 +13,58 @@ export default function VendorCard({ vendor }) {
   const inCart = cartItems.some(
     (i) => i.vendorId === vendor.id && i.packageName === basePackage?.name
   );
+
+  // Build the full image pool: [imageUrl, ...galleryUrls] minus empties
+  const allImages = [
+    vendor.imageUrl,
+    ...(vendor.galleryUrls || []),
+  ].filter(Boolean);
+
+  // Active displayed image index (0 = main, then gallery in order)
+  const [imgIndex, setImgIndex] = useState(0);
+  // For crossfade: track the "previous" image while fading in the new one
+  const [prevIndex, setPrevIndex] = useState(null);
+  const [fading, setFading] = useState(false);
+  const intervalRef = useRef(null);
+  const hoveringRef = useRef(false);
+
+  const advanceImage = useCallback(() => {
+    if (allImages.length < 2) return;
+    setImgIndex((cur) => {
+      const next = (cur + 1) % allImages.length;
+      setPrevIndex(cur);
+      setFading(true);
+      return next;
+    });
+  }, [allImages.length]);
+
+  const startLoop = useCallback(() => {
+    if (allImages.length < 2) return;
+    hoveringRef.current = true;
+    // Advance immediately, then every 1.4 s
+    advanceImage();
+    intervalRef.current = setInterval(advanceImage, 1400);
+  }, [advanceImage, allImages.length]);
+
+  const stopLoop = useCallback(() => {
+    hoveringRef.current = false;
+    clearInterval(intervalRef.current);
+    intervalRef.current = null;
+    // Reset back to main image
+    setFading(false);
+    setPrevIndex(null);
+    setImgIndex(0);
+  }, []);
+
+  // Cleanup on unmount
+  useEffect(() => () => clearInterval(intervalRef.current), []);
+
+  // After fading in, clear the "previous" overlay
+  useEffect(() => {
+    if (!fading) return;
+    const t = setTimeout(() => setFading(false), 500);
+    return () => clearTimeout(t);
+  }, [fading, imgIndex]);
 
   const handleAddToCart = (e) => {
     e.preventDefault();
@@ -25,13 +78,56 @@ export default function VendorCard({ vendor }) {
     });
   };
 
+  const hasImage = allImages.length > 0;
+
   return (
-    <Link to={`/services/${vendor.category}/${vendor.id}`} className="vendor-card card">
-      {/* Image */}
+    <Link
+      to={`/services/${vendor.category}/${vendor.id}`}
+      className="vendor-card card"
+      onMouseEnter={startLoop}
+      onMouseLeave={stopLoop}
+    >
+      {/* Image / Emoji area */}
       <div className="vendor-card-image">
-        <div className="vendor-card-img-placeholder" style={{ background: vendor.color || 'var(--bg-card-hover)' }}>
-          <span className="vendor-emoji">{vendor.emoji || '🎉'}</span>
-        </div>
+        {hasImage ? (
+          <>
+            {/* Previous image fades out */}
+            {fading && prevIndex !== null && (
+              <img
+                key={`prev-${prevIndex}`}
+                src={allImages[prevIndex]}
+                alt=""
+                className="vendor-card-img vendor-card-img-prev"
+              />
+            )}
+            {/* Current image fades in */}
+            <img
+              key={`cur-${imgIndex}`}
+              src={allImages[imgIndex]}
+              alt={vendor.name}
+              className={`vendor-card-img ${fading ? 'vendor-card-img-enter' : 'vendor-card-img-visible'}`}
+            />
+            {/* Image counter dot indicators */}
+            {allImages.length > 1 && (
+              <div className="vendor-img-dots">
+                {allImages.map((_, i) => (
+                  <span
+                    key={i}
+                    className={`vendor-img-dot ${i === imgIndex ? 'active' : ''}`}
+                  />
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          <div
+            className="vendor-card-img-placeholder"
+            style={{ background: vendor.color || 'var(--bg-card-hover)' }}
+          >
+            <span className="vendor-emoji">{vendor.emoji || '🎉'}</span>
+          </div>
+        )}
+
         <div className="vendor-card-category">{vendor.category}</div>
         {vendor.featured && <div className="vendor-card-featured">⭐ Featured</div>}
       </div>

@@ -1,11 +1,12 @@
 // src/components/layout/Navbar.jsx
 import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Menu, X, Zap, LogOut, User, LayoutDashboard, Shield } from 'lucide-react';
+import { ShoppingCart, Menu, X, LogOut, User, LayoutDashboard, Shield } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import { signOutUser } from '../../firebase/auth';
 import { toast } from 'react-toastify';
+import AnimatedLogo from '../common/AnimatedLogo';
 import './Navbar.css';
 
 export default function Navbar() {
@@ -26,10 +27,7 @@ export default function Navbar() {
     <nav className="navbar glass">
       <div className="container navbar-inner">
         {/* Logo */}
-        <Link to="/" className="navbar-logo">
-          <Zap size={22} fill="currentColor" />
-          EventAura
-        </Link>
+        <AnimatedLogo size="md" to="/" />
 
         {/* Desktop Nav Links */}
         <div className="navbar-links hide-mobile">

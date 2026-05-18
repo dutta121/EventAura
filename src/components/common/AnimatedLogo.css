@@ -1,0 +1,118 @@
+/* src/components/common/AnimatedLogo.css */
+
+/* ── Icon wrapper ── */
+.alogo-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Spinning outer ring – shown on hover of the parent logo */
+.alogo-icon::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    var(--primary) 30%,
+    var(--accent) 60%,
+    transparent 80%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  animation: alogo-spin 1.8s linear infinite paused;
+  z-index: 0;
+}
+.alogo-root:hover .alogo-icon::before {
+  opacity: 0.7;
+  animation-play-state: running;
+}
+
+/* Solid background circle so the spinning ring doesn't bleed through */
+.alogo-icon::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  background: var(--bg, #0f0a1e);
+  z-index: 1;
+}
+
+.alogo-icon svg {
+  position: relative;
+  z-index: 2;
+}
+
+@keyframes alogo-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Zap icon continuous pulse-glow ── */
+.alogo-zap {
+  animation: alogo-zap-glow 2.4s ease-in-out infinite;
+  filter: drop-shadow(0 0 6px var(--accent));
+}
+@keyframes alogo-zap-glow {
+  0%, 100% { opacity: 1;   filter: drop-shadow(0 0 4px var(--accent)); }
+  50%       { opacity: 0.7; filter: drop-shadow(0 0 12px var(--primary-light)); }
+}
+
+/* ── Text ── */
+.alogo-text {
+  display: flex;
+  align-items: baseline;
+  gap: 0;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.alogo-event {
+  color: var(--text-primary, #f1f5f9);
+  transition: color 0.3s ease;
+}
+
+/* "Aura" gets a sweeping gradient shimmer */
+.alogo-aura {
+  background: linear-gradient(
+    90deg,
+    var(--primary-light) 0%,
+    var(--accent)        40%,
+    #f472b6              70%,
+    var(--primary-light) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: alogo-shimmer 3s linear infinite;
+}
+@keyframes alogo-shimmer {
+  0%   { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+/* ── Sizes ── */
+.alogo-root.size-md .alogo-text { font-size: 1.2rem; }
+.alogo-root.size-md .alogo-icon { width: 28px; height: 28px; }
+
+.alogo-root.size-sm .alogo-text { font-size: 1rem; }
+.alogo-root.size-sm .alogo-icon { width: 22px; height: 22px; }
+
+.alogo-root.size-lg .alogo-text { font-size: 1.6rem; }
+.alogo-root.size-lg .alogo-icon { width: 36px; height: 36px; }
+
+/* ── Root link / wrapper ── */
+.alogo-root {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+}

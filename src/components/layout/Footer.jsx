@@ -1,6 +1,7 @@
 // src/components/layout/Footer.jsx
 import { Link } from 'react-router-dom';
-import { Zap, Mail, Phone, MapPin } from 'lucide-react';
+import { Mail, Phone, MapPin } from 'lucide-react';
+import AnimatedLogo from '../common/AnimatedLogo';
 import './Footer.css';
 
 const InstagramIcon = () => (
@@ -24,10 +25,7 @@ export default function Footer() {
     <footer className="footer">
       <div className="container footer-grid">
         <div className="footer-brand">
-          <Link to="/" className="footer-logo">
-            <Zap size={20} fill="currentColor" />
-            EventAura
-          </Link>
+          <AnimatedLogo size="md" to="/" />
           <p>Your one-stop platform for premium event planning. From birthdays to weddings, we make every moment magical.</p>
           <div className="footer-socials">
             <a href="#" aria-label="Instagram"><InstagramIcon /></a>

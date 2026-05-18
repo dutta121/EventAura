@@ -1,9 +1,10 @@
 // src/pages/admin/AdminLayout.jsx
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Store, CalendarCheck, Users, LogOut, Zap, Shield } from 'lucide-react';
+import { LayoutDashboard, Store, CalendarCheck, Users, LogOut, Shield } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { signOutUser } from '../../firebase/auth';
 import { toast } from 'react-toastify';
+import AnimatedLogo from '../../components/common/AnimatedLogo';
 import './AdminLayout.css';
 
 const NAV_ITEMS = [
@@ -28,8 +29,7 @@ export default function AdminLayout() {
       {/* Sidebar */}
       <aside className="admin-sidebar">
         <div className="admin-brand">
-          <Zap size={18} fill="currentColor" />
-          <span>EventAura</span>
+          <AnimatedLogo size="sm" as="div" />
           <span className="admin-tag"><Shield size={11} /> Admin</span>
         </div>
 
