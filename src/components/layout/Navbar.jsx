@@ -1,5 +1,5 @@
 // src/components/layout/Navbar.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Menu, X, LogOut, User, LayoutDashboard, Shield } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -15,6 +15,13 @@ export default function Navbar() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const handleSignOut = async () => {
     await signOutUser();
@@ -24,7 +31,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="navbar glass">
+    <nav className={`navbar glass ${scrolled ? 'scrolled' : ''}`}>
       <div className="container navbar-inner">
         {/* Logo */}
         <AnimatedLogo size="md" to="/" />

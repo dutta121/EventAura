@@ -24,7 +24,14 @@ export default function VendorCard({ vendor }) {
   const [prevIndex, setPrevIndex] = useState(null);
   const [fading, setFading]     = useState(false);
   const [hovered, setHovered]   = useState(false);
+  const [isTouch, setIsTouch]   = useState(false);
   const intervalRef = useRef(null);
+
+  // Detect touch-only devices once on mount
+  useEffect(() => {
+    const touch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    setIsTouch(touch);
+  }, []);
 
   const goTo = useCallback((next) => {
     if (allImages.length < 2) return;
@@ -44,15 +51,18 @@ export default function VendorCard({ vendor }) {
     });
   }, [allImages.length]);
 
-  // Auto-play when hovered
+  // Auto-play:
+  //   • touch devices  → always running (no hover needed)
+  //   • pointer devices → only while hovered
   useEffect(() => {
-    if (hovered && allImages.length > 1) {
-      intervalRef.current = setInterval(advanceImage, 1800);
+    const shouldPlay = allImages.length > 1 && (isTouch || hovered);
+    if (shouldPlay) {
+      intervalRef.current = setInterval(advanceImage, isTouch ? 2200 : 1800);
     } else {
       clearInterval(intervalRef.current);
     }
     return () => clearInterval(intervalRef.current);
-  }, [hovered, advanceImage, allImages.length]);
+  }, [hovered, isTouch, advanceImage, allImages.length]);
 
   // Reset to first image when mouse leaves
   const handleMouseLeave = () => {

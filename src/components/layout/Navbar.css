@@ -1,9 +1,22 @@
 /* src/components/layout/Navbar.css */
+
+/* ── Base glass navbar ── */
 .navbar {
   position: sticky;
   top: 0;
   z-index: 100;
-  border-bottom: 1px solid var(--border-light);
+  /* Frosted glass base */
+  background: rgba(15, 10, 30, 0.55);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  transition: background 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+}
+/* Deepen the glass once user has scrolled */
+.navbar.scrolled {
+  background: rgba(15, 10, 30, 0.82);
+  border-bottom-color: rgba(124, 58, 237, 0.2);
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.45);
 }
 .navbar-inner {
   display: flex;
