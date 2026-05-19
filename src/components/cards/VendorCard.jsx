@@ -1,6 +1,6 @@
 // src/components/cards/VendorCard.jsx
 import { Link } from 'react-router-dom';
-import { Star, MapPin, ShoppingCart, Check } from 'lucide-react';
+import { Star, MapPin, ShoppingCart, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { formatCurrency } from '../../utils/formatCurrency';
 import { useRef, useState, useEffect, useCallback } from 'react';
@@ -20,16 +20,22 @@ export default function VendorCard({ vendor }) {
     ...(vendor.galleryUrls || []),
   ].filter(Boolean);
 
-  // Active displayed image index (0 = main, then gallery in order)
   const [imgIndex, setImgIndex] = useState(0);
-  // For crossfade: track the "previous" image while fading in the new one
   const [prevIndex, setPrevIndex] = useState(null);
-  const [fading, setFading] = useState(false);
+  const [fading, setFading]     = useState(false);
+  const [hovered, setHovered]   = useState(false);
   const intervalRef = useRef(null);
-  const hoveringRef = useRef(false);
+
+  const goTo = useCallback((next) => {
+    if (allImages.length < 2) return;
+    setImgIndex((cur) => {
+      setPrevIndex(cur);
+      setFading(true);
+      return (next + allImages.length) % allImages.length;
+    });
+  }, [allImages.length]);
 
   const advanceImage = useCallback(() => {
-    if (allImages.length < 2) return;
     setImgIndex((cur) => {
       const next = (cur + 1) % allImages.length;
       setPrevIndex(cur);
@@ -38,28 +44,26 @@ export default function VendorCard({ vendor }) {
     });
   }, [allImages.length]);
 
-  const startLoop = useCallback(() => {
-    if (allImages.length < 2) return;
-    hoveringRef.current = true;
-    // Advance immediately, then every 1.4 s
-    advanceImage();
-    intervalRef.current = setInterval(advanceImage, 1400);
-  }, [advanceImage, allImages.length]);
+  // Auto-play when hovered
+  useEffect(() => {
+    if (hovered && allImages.length > 1) {
+      intervalRef.current = setInterval(advanceImage, 1800);
+    } else {
+      clearInterval(intervalRef.current);
+    }
+    return () => clearInterval(intervalRef.current);
+  }, [hovered, advanceImage, allImages.length]);
 
-  const stopLoop = useCallback(() => {
-    hoveringRef.current = false;
+  // Reset to first image when mouse leaves
+  const handleMouseLeave = () => {
+    setHovered(false);
     clearInterval(intervalRef.current);
-    intervalRef.current = null;
-    // Reset back to main image
     setFading(false);
     setPrevIndex(null);
     setImgIndex(0);
-  }, []);
+  };
 
-  // Cleanup on unmount
-  useEffect(() => () => clearInterval(intervalRef.current), []);
-
-  // After fading in, clear the "previous" overlay
+  // Clear fading state after animation
   useEffect(() => {
     if (!fading) return;
     const t = setTimeout(() => setFading(false), 500);
@@ -78,20 +82,41 @@ export default function VendorCard({ vendor }) {
     });
   };
 
+  const handleNav = (e, dir) => {
+    e.preventDefault();
+    e.stopPropagation();
+    clearInterval(intervalRef.current);
+    goTo(imgIndex + dir);
+    // Restart auto-play after manual nav
+    if (hovered) {
+      intervalRef.current = setInterval(advanceImage, 1800);
+    }
+  };
+
+  const handleDotClick = (e, i) => {
+    e.preventDefault();
+    e.stopPropagation();
+    clearInterval(intervalRef.current);
+    goTo(i);
+    if (hovered) {
+      intervalRef.current = setInterval(advanceImage, 1800);
+    }
+  };
+
   const hasImage = allImages.length > 0;
 
   return (
     <Link
       to={`/services/${vendor.category}/${vendor.id}`}
       className="vendor-card card"
-      onMouseEnter={startLoop}
-      onMouseLeave={stopLoop}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={handleMouseLeave}
     >
       {/* Image / Emoji area */}
       <div className="vendor-card-image">
         {hasImage ? (
           <>
-            {/* Previous image fades out */}
+            {/* Outgoing image fades out */}
             {fading && prevIndex !== null && (
               <img
                 key={`prev-${prevIndex}`}
@@ -107,13 +132,36 @@ export default function VendorCard({ vendor }) {
               alt={vendor.name}
               className={`vendor-card-img ${fading ? 'vendor-card-img-enter' : 'vendor-card-img-visible'}`}
             />
-            {/* Image counter dot indicators */}
+
+            {/* ── Nav arrows (visible on hover when >1 image) ── */}
+            {allImages.length > 1 && (
+              <>
+                <button
+                  className="vc-nav-btn vc-nav-prev"
+                  onClick={(e) => handleNav(e, -1)}
+                  aria-label="Previous image"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <button
+                  className="vc-nav-btn vc-nav-next"
+                  onClick={(e) => handleNav(e, 1)}
+                  aria-label="Next image"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </>
+            )}
+
+            {/* ── Dot indicators (clickable) ── */}
             {allImages.length > 1 && (
               <div className="vendor-img-dots">
                 {allImages.map((_, i) => (
-                  <span
+                  <button
                     key={i}
                     className={`vendor-img-dot ${i === imgIndex ? 'active' : ''}`}
+                    onClick={(e) => handleDotClick(e, i)}
+                    aria-label={`Go to image ${i + 1}`}
                   />
                 ))}
               </div>

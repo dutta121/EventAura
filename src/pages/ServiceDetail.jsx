@@ -1,7 +1,7 @@
 // src/pages/ServiceDetail.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Star, MapPin, Phone, Check, ShoppingCart, ArrowLeft } from 'lucide-react';
+import { Star, MapPin, Check, ShoppingCart, ArrowLeft, X, ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react';
 import { getVendorById } from '../firebase/firestore';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -9,14 +9,90 @@ import { formatCurrency } from '../utils/formatCurrency';
 import { toast } from 'react-toastify';
 import './ServiceDetail.css';
 
+/* ── Lightbox Component ─────────────────────────────────────────────────────── */
+function Lightbox({ images, startIndex, onClose }) {
+  const [current, setCurrent] = useState(startIndex);
+
+  const prev = useCallback(() => setCurrent((c) => (c - 1 + images.length) % images.length), [images.length]);
+  const next = useCallback(() => setCurrent((c) => (c + 1) % images.length), [images.length]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'ArrowLeft')  prev();
+      if (e.key === 'ArrowRight') next();
+      if (e.key === 'Escape')     onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = '';
+    };
+  }, [prev, next, onClose]);
+
+  return (
+    <div className="lightbox-overlay" onClick={onClose}>
+      {/* Close */}
+      <button className="lightbox-close" onClick={onClose} aria-label="Close">
+        <X size={22} />
+      </button>
+
+      {/* Counter */}
+      <div className="lightbox-counter">{current + 1} / {images.length}</div>
+
+      {/* Prev */}
+      {images.length > 1 && (
+        <button className="lightbox-nav lightbox-prev" onClick={(e) => { e.stopPropagation(); prev(); }} aria-label="Previous">
+          <ChevronLeft size={28} />
+        </button>
+      )}
+
+      {/* Image */}
+      <div className="lightbox-img-wrap" onClick={(e) => e.stopPropagation()}>
+        <img
+          key={current}
+          src={images[current]}
+          alt={`Portfolio ${current + 1}`}
+          className="lightbox-img"
+        />
+      </div>
+
+      {/* Next */}
+      {images.length > 1 && (
+        <button className="lightbox-nav lightbox-next" onClick={(e) => { e.stopPropagation(); next(); }} aria-label="Next">
+          <ChevronRight size={28} />
+        </button>
+      )}
+
+      {/* Dot strip */}
+      {images.length > 1 && (
+        <div className="lightbox-dots">
+          {images.map((_, i) => (
+            <button
+              key={i}
+              className={`lightbox-dot ${i === current ? 'active' : ''}`}
+              onClick={(e) => { e.stopPropagation(); setCurrent(i); }}
+              aria-label={`Go to image ${i + 1}`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Main Page ──────────────────────────────────────────────────────────────── */
 export default function ServiceDetail() {
-  const { category, id } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const { addToCart, cartItems } = useCart();
-  const [vendor, setVendor] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [vendor, setVendor]         = useState(null);
+  const [loading, setLoading]       = useState(true);
   const [selectedPkg, setSelectedPkg] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxStart, setLightboxStart] = useState(0);
 
   useEffect(() => {
     const fetch = async () => {
@@ -29,9 +105,9 @@ export default function ServiceDetail() {
   }, [id]);
 
   if (loading) return <div className="page-loader"><div className="spinner" /><span>Loading vendor...</span></div>;
-  if (!vendor) return <div className="page-loader"><h2>Vendor not found</h2></div>;
+  if (!vendor)  return <div className="page-loader"><h2>Vendor not found</h2></div>;
 
-  const pkg = vendor.packages?.[selectedPkg];
+  const pkg    = vendor.packages?.[selectedPkg];
   const inCart = cartItems.some((i) => i.vendorId === vendor.id && i.packageName === pkg?.name);
 
   const handleAddToCart = () => {
@@ -41,8 +117,23 @@ export default function ServiceDetail() {
     toast.success(`${pkg.name} added to cart! 🎉`);
   };
 
+  // Build gallery image list
+  const galleryImages = vendor.galleryUrls?.length > 0
+    ? vendor.galleryUrls
+    : [];
+
+  const openLightbox = (i) => { setLightboxStart(i); setLightboxOpen(true); };
+
   return (
     <div className="service-detail">
+      {lightboxOpen && galleryImages.length > 0 && (
+        <Lightbox
+          images={galleryImages}
+          startIndex={lightboxStart}
+          onClose={() => setLightboxOpen(false)}
+        />
+      )}
+
       <div className="container">
         <button className="btn btn-secondary btn-sm back-btn" onClick={() => navigate(-1)}>
           <ArrowLeft size={16} /> Back
@@ -53,15 +144,15 @@ export default function ServiceDetail() {
           <div className="detail-main">
             {/* Header */}
             <div className="detail-header card">
-            <div className="detail-hero-img" style={{
+              <div className="detail-hero-img" style={{
                 background: vendor.heroGradient || 'linear-gradient(135deg,var(--primary),var(--primary-dark))',
               }}>
-              {vendor.imageUrl ? (
-                <img src={vendor.imageUrl} alt={vendor.name} className="detail-hero-real-img" />
-              ) : (
-                <span className="detail-hero-emoji">{vendor.emoji || '🎉'}</span>
-              )}
-            </div>
+                {vendor.imageUrl ? (
+                  <img src={vendor.imageUrl} alt={vendor.name} className="detail-hero-real-img" />
+                ) : (
+                  <span className="detail-hero-emoji">{vendor.emoji || '🎉'}</span>
+                )}
+              </div>
               <div className="detail-header-body">
                 <div className="detail-badge">{vendor.category}</div>
                 <h1>{vendor.name}</h1>
@@ -106,14 +197,22 @@ export default function ServiceDetail() {
             </div>
 
             {/* Gallery */}
-            {(vendor.galleryUrls?.length > 0 || vendor.portfolioEmojis) && (
+            {(galleryImages.length > 0 || vendor.portfolioEmojis) && (
               <div className="detail-gallery card">
                 <h2>Portfolio</h2>
                 <div className="gallery-grid">
-                  {vendor.galleryUrls?.length > 0
-                    ? vendor.galleryUrls.map((url, i) => (
-                        <div key={i} className="gallery-item gallery-item-photo">
+                  {galleryImages.length > 0
+                    ? galleryImages.map((url, i) => (
+                        <div
+                          key={i}
+                          className="gallery-item gallery-item-photo"
+                          onClick={() => openLightbox(i)}
+                          title="Click to view full screen"
+                        >
                           <img src={url} alt={`Portfolio ${i + 1}`} />
+                          <div className="gallery-item-overlay">
+                            <ZoomIn size={20} />
+                          </div>
                         </div>
                       ))
                     : vendor.portfolioEmojis?.map((em, i) => (
